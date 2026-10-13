@@ -127,6 +127,18 @@ app = create_starlette_app(servicenow_mcp, debug=True)
 uvicorn.run(app, host="0.0.0.0", port=8080)
 ```
 
+#### Health Check
+
+The server exposes no dedicated health endpoint such as `/health`; liveness is checked against the existing `/sse` endpoint:
+
+```shell
+curl -s --max-time 2 -o /dev/null -w "%{http_code}\n" http://localhost:8080/sse
+```
+
+A running server prints `200`; a down server prints `000` with a connection error. `curl` exits after the 2-second cap because `/sse` holds the SSE stream open by design — this is expected behavior, not a failure.
+
+If you started the server with `--host`/`--port`, substitute those values in the URL.
+
 ## Tool Packaging (Optional)
 
 To manage the number of tools exposed to the language model (especially in environments with limits), the ServiceNow MCP server supports loading subsets of tools called "packages". This is controlled via the `MCP_TOOL_PACKAGE` environment variable.
