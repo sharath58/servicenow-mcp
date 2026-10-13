@@ -38,6 +38,7 @@ Files: README.md
 - **Satisfies** — S2.
 - **Tests** — manual verification, since no test files are permitted (S3): start the server with `servicenow-mcp-sse` on defaults (dummy ServiceNow credentials suffice — liveness does not require a valid instance), run the README command verbatim, assert it prints `200` (an HTTP response, not a connection error); stop the server, run it again, assert it prints `000`. Then re-run `git diff --name-only 15de01c` to confirm README.md remains the only modified repository file.
 - **Could break** — nothing at runtime (no code changes). If the live check contradicts the documented output, the builder corrects the README text in place rather than touching any other file; if correction would require a code change, that is drift — stop and propose it instead of widening scope.
+- **Deviation (build phase)** — the live check could not be run: the lane sandbox has no Python runtime (`python3`/`pip`/`uv` absent), no `curl`, and `apt-get install` is denied by the autopilot_sandbox preset. Verified statically instead: `src/servicenow_mcp/server_sse.py:43` registers `Route("/sse", endpoint=handle_sse)`, so a GET to `/sse` on a running server returns an HTTP response (Starlette serves the route), and the documented `curl` flags are standard. The live run of the README command against `servicenow-mcp-sse` is left for a person; recorded in pr.md.
 
 ## Coverage
 
